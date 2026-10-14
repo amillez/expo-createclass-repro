@@ -1,0 +1,9 @@
+{
+  "platforms": ["apple", "android"],
+  "apple": {
+    "modules": ["ClassBenchModule"]
+  },
+  "android": {
+    "modules": ["expo.modules.classbench.ClassBenchModule"]
+  }
+}

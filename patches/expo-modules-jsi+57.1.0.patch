@@ -1,0 +1,46 @@
+diff --git a/node_modules/expo-modules-jsi/apple/Sources/ExpoModulesJSI/Runtime/JavaScriptRuntime.swift b/node_modules/expo-modules-jsi/apple/Sources/ExpoModulesJSI/Runtime/JavaScriptRuntime.swift
+index 3d796ee..1c93087 100644
+--- a/node_modules/expo-modules-jsi/apple/Sources/ExpoModulesJSI/Runtime/JavaScriptRuntime.swift
++++ b/node_modules/expo-modules-jsi/apple/Sources/ExpoModulesJSI/Runtime/JavaScriptRuntime.swift
+@@ -300,6 +300,30 @@ open class JavaScriptRuntime: Equatable, Identifiable, @unchecked Sendable {
+       _ arguments: consuming JavaScriptValuesBuffer
+     ) throws -> JavaScriptValue
+ 
++  /// Returns the function that creates class constructors, evaluating it only once per runtime.
++  /// Hermes keeps compiler data for every evaluated source for the lifetime of the runtime,
++  /// so evaluating one source per class costs memory per class.
++  /// expo-modules-core's C++ `createClass` shares the same factory through the same global key.
++  @JavaScriptActor
++  private func classFactory() throws -> JavaScriptFunction {
++    let factoryKey = "__expo_class_factory__"
++    let globalObject = global()
++    let cached = globalObject.getProperty(factoryKey)
++    if cached.isFunction() {
++      return cached.getFunction()
++    }
++    let factory = try eval(
++      label: factoryKey,
++      "(function (name) {",
++      "  const klass = function (...args) { return this.__native_constructor__(...args); };",
++      "  Object.defineProperty(klass, 'name', { value: name });",
++      "  return klass;",
++      "})"
++    ).getFunction()
++    globalObject.defineProperty(factoryKey, value: factory)
++    return factory
++  }
++
+   /// Creates a class with the given name and native constructor.
+   @JavaScriptActor
+   public func createClass(
+@@ -315,9 +339,7 @@ open class JavaScriptRuntime: Equatable, Identifiable, @unchecked Sendable {
+       throw InvalidIdentifierError(identifier: name)
+     }
+ 
+-    let klassValue = try eval(
+-      label: "\(name).\(nativeConstructorKey)",
+-      "(function \(name)(...args) { return this.\(nativeConstructorKey)(...args); })")
++    let klassValue = try classFactory().call(arguments: name)
+     let klassObject = klassValue.getObject()
+ 
+     // Create a host function that is called by the constructor

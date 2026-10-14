@@ -1,0 +1,52 @@
+diff --git a/node_modules/expo-modules-core/common/cpp/JSI/JSIUtils.cpp b/node_modules/expo-modules-core/common/cpp/JSI/JSIUtils.cpp
+index 9b51f05..a4b5a6f 100644
+--- a/node_modules/expo-modules-core/common/cpp/JSI/JSIUtils.cpp
++++ b/node_modules/expo-modules-core/common/cpp/JSI/JSIUtils.cpp
+@@ -1,21 +1,39 @@
+ // Copyright 2022-present 650 Industries. All rights reserved.
+ 
+-#include <sstream>
+ #include <utility>
+ #include "JSIUtils.h"
+ 
+ namespace expo::common {
+ 
++// Hermes keeps compiler data for every evaluated source for the lifetime of the runtime,
++// so the class constructor source is evaluated once per runtime and reused for every class.
++// expo-modules-jsi's Swift `createClass` shares the same factory through the same global key.
++static jsi::Function getClassFactory(jsi::Runtime &runtime) {
++  const char *factoryKey = "__expo_class_factory__";
++  jsi::Object global = runtime.global();
++  jsi::Value cached = global.getProperty(runtime, factoryKey);
++  if (cached.isObject() && cached.getObject(runtime).isFunction(runtime)) {
++    return cached.getObject(runtime).getFunction(runtime);
++  }
++  std::shared_ptr<jsi::StringBuffer> sourceBuffer = std::make_shared<jsi::StringBuffer>(
++    "(function (name) {"
++    "  const klass = function (...args) { return this.__native_constructor__(...args); };"
++    "  Object.defineProperty(klass, 'name', { value: name });"
++    "  return klass;"
++    "})");
++  jsi::Function factory = runtime.evaluateJavaScript(sourceBuffer, "").asObject(runtime).asFunction(runtime);
++  jsi::Object descriptor(runtime);
++  descriptor.setProperty(runtime, "value", jsi::Value(runtime, factory));
++  defineProperty(runtime, &global, factoryKey, std::move(descriptor));
++  return factory;
++}
++
+ jsi::Function createClass(jsi::Runtime &runtime, const char *name, ClassConstructor constructor) {
+   std::string nativeConstructorKey("__native_constructor__");
+ 
+-  // Create a string buffer of the source code to evaluate.
+-  std::stringstream source;
+-  source << "(function " << name << "(...args) { return this." << nativeConstructorKey << "(...args); })";
+-  std::shared_ptr<jsi::StringBuffer> sourceBuffer = std::make_shared<jsi::StringBuffer>(source.str());
+-
+-  // Evaluate the code and obtain returned value (the constructor function).
+-  jsi::Object klass = runtime.evaluateJavaScript(sourceBuffer, "").asObject(runtime);
++  jsi::Object klass = getClassFactory(runtime)
++    .call(runtime, jsi::String::createFromUtf8(runtime, name))
++    .asObject(runtime);
+ 
+   // Set the native constructor in the prototype.
+   jsi::Object prototype = klass.getPropertyAsObject(runtime, "prototype");
