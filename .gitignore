@@ -42,3 +42,5 @@ yarn-error.*
 
 # build output
 /build
+modules/*/android/build
+modules/*/android/.cxx

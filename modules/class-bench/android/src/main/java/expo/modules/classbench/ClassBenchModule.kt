@@ -5,7 +5,7 @@ import android.util.Log
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
 
-private const val CLASS_COUNT = 0
+private const val CLASS_COUNT = 200
 
 class ClassBenchModule : Module() {
   override fun definition() = ModuleDefinition {
