@@ -5,8 +5,8 @@
   "private": true,
   "scripts": {
     "gen": "node scripts/gen-classes.mjs",
-    "patch:on": "node scripts/set-patch.mjs on",
-    "patch:off": "node scripts/set-patch.mjs off",
+    "patch:on": "scripts/set-patch.sh on",
+    "patch:off": "scripts/set-patch.sh off",
     "bench": "scripts/bench.sh"
   },
   "dependencies": {

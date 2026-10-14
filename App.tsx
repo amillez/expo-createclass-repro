@@ -11,6 +11,7 @@ for (let i = 0; i < classCount; i++) {
   if (typeof ClassBench[`Bench${i}`] === 'function') classesFound++;
 }
 const sharedFactory = typeof (globalThis as any).__expo_class_factory__ === 'function';
+ClassBench.report(`classes=${classesFound}/${classCount} factory=${sharedFactory ? 'yes' : 'no'}`);
 
 export default function App() {
   return (

@@ -3,7 +3,14 @@ import { readFileSync } from 'node:fs';
 
 const [header, ...lines] = readFileSync(new URL('../results/raw.csv', import.meta.url), 'utf8').trim().split('\n');
 const columns = header.split(',');
-const rows = lines.map((line) => Object.fromEntries(line.split(',').map((value, i) => [columns[i], value])));
+const rows = lines.map((line, i) => {
+  const values = line.split(',');
+  const row = Object.fromEntries(values.map((value, j) => [columns[j], value]));
+  if (values.length !== columns.length || !/^\d+$/.test(row.kb) || !/^\d*$/.test(row.native_heap_kb)) {
+    throw new Error(`malformed row ${i + 2} in results/raw.csv: ${line}`);
+  }
+  return row;
+});
 
 const median = (values) => {
   const sorted = [...values].sort((a, b) => a - b);

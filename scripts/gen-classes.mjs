@@ -24,6 +24,11 @@ public class ClassBenchModule: Module {
     Name("ClassBench")
 
     Constant("classCount") { ${n} }
+
+    // Lets scripts/bench.sh read the first screen's state from the system log.
+    Function("report") { (message: String) in
+      NSLog("classbench: %@", message)
+    }
 ${swiftClasses ? `\n${swiftClasses}\n` : ''}  }
 }
 `
@@ -35,6 +40,7 @@ writeFileSync(
   `${header}
 package expo.modules.classbench
 
+import android.util.Log
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
 
@@ -45,6 +51,9 @@ class ClassBenchModule : Module() {
     Name("ClassBench")
 
     Constant("classCount") { CLASS_COUNT }
+
+    // Lets scripts/bench.sh read the first screen's state from logcat.
+    Function("report") { message: String -> Log.i("ClassBench", "classbench: $message") }
 
     repeat(CLASS_COUNT) { Class("Bench$it") }
   }
