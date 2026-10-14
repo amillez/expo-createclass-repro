@@ -4,7 +4,7 @@ package expo.modules.classbench
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
 
-private const val CLASS_COUNT = 3
+private const val CLASS_COUNT = 200
 
 class ClassBenchModule : Module() {
   override fun definition() = ModuleDefinition {

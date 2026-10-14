@@ -28,7 +28,8 @@
     "autolinking": {
       "ios": {
         "buildFromSource": [
-          "ExpoModulesCore"
+          "ExpoModulesCore",
+          "ExpoModulesWorklets"
         ]
       }
     }
