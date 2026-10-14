@@ -18,7 +18,7 @@ This is on react-native 0.86.3 with Hermes `250829098.0.17`, the version #46519 
 
 ## Steps to reproduce
 
-Repro: `<repro-repo-url>`
+Repro: https://github.com/amillez/expo-createclass-repro
 
 1. `npm install && npx expo prebuild --no-install`
 2. Boot a simulator and run `IOS_UDID=<udid> scripts/bench.sh ios 0 off 5`, then `ios 200 off 5`.
