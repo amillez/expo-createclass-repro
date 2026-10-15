@@ -66,3 +66,4 @@ On iOS the patch only takes effect for the C++ path when `ExpoModulesCore` build
 - https://github.com/expo/expo/issues/46519 (Hermes V1 memory regression, locked)
 - https://github.com/facebook/hermes/issues/2048 (Severe memory regression in V1)
 - https://github.com/facebook/hermes/pull/2090, "Avoid storing Module/SemContext in non-debug global eval" (backport of https://github.com/facebook/hermes/pull/2053). It ships in `hermes-v250829098.0.15` and later, so the Hermes in this repro has it. Its description says sources that are still compiled lazily keep this data. The sources here are one-line functions and still cost 0.57 MiB each.
+- https://github.com/software-mansion/react-native-reanimated/issues/9650 (worklets hits the same Hermes V1 per-eval cost when it evaluates its helper scripts one by one)
